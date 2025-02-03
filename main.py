@@ -79,9 +79,7 @@ def extract_face(image, margin_top=100, margin_other=50):
     st.write(f"Image shape: {rgb_image.shape}, dtype: {rgb_image.dtype}")
 
     # Detect faces
-    #face_locations = face_recognition.face_locations(rgb_image)
-    face_locations = face_recognition.face_locations(rgb_image, model="cnn")
-
+    face_locations = face_recognition.face_locations(rgb_image)
 
     if not face_locations:
         st.warning("⚠️ No face detected. Try another image.")
