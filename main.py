@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 # Load API Key
 load_dotenv()
-os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY= st.secrets("GROQ_API_KEY")
 
 # Encode image to base64
 def encode_image(image_path):
