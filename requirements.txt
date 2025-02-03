@@ -7,5 +7,5 @@ python-dotenv
 setuptools
 wheel
 pillow
-dlib-bin==19.24.2.post1
+dlib
 face_recognition @ git+https://github.com/thetoby9944/face_recognition.git
