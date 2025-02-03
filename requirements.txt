@@ -1,9 +1,11 @@
 streamlit
 opencv-python
-face-recognition
 groq
 pandas
 numpy
 python-dotenv
 setuptools
 wheel
+pillow
+dlib-bin==19.24.2.post1
+face_recognition @ git+https://github.com/thetoby9944/face_recognition.git
