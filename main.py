@@ -72,11 +72,11 @@ def extract_face(image, margin_top=100, margin_other=50):
     rgb_image = np.array(image.convert("RGB"), dtype=np.uint8)  
 
     # Validate Image Format
-    if len(rgb_image.shape) != 3 or rgb_image.shape[2] != 3:
-        raise ValueError("Invalid image format: Image must be an 8-bit RGB image.")
+    if rgb_image.dtype != np.uint8:
+        raise ValueError("Image data must be 8-bit per channel.")
 
-    # Debug: Show Image
-    st.image(image, caption="Debug: Aadhaar Image", use_column_width=True)
+    # Debug: Check image properties
+    st.write(f"Image shape: {rgb_image.shape}, dtype: {rgb_image.dtype}")
 
     # Detect faces
     face_locations = face_recognition.face_locations(rgb_image)
@@ -97,6 +97,7 @@ def extract_face(image, margin_top=100, margin_other=50):
 
     # Crop and return the face
     return image.crop((left, top, right, bottom))
+
 
 
 # Face verification
