@@ -75,10 +75,6 @@ def extract_face(image, margin_top=100, margin_other=50):
     if rgb_image.dtype != np.uint8:
         raise ValueError("Image data must be 8-bit per channel.")
 
-    # Debug: Check image properties
-    st.write(f"Image shape: {rgb_image.shape}, dtype: {rgb_image.dtype}")
-
-    # Detect faces
     face_locations = face_recognition.face_locations(rgb_image)
 
     if not face_locations:
