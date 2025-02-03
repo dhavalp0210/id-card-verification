@@ -8,13 +8,15 @@ from PIL import Image
 import tempfile
 import os
 import json
-import pandas as pd
 import re
 from dotenv import load_dotenv
 
 # Load API Key
 load_dotenv()
-GROQ_API_KEY= st.secrets["GROQ_API_KEY"]
+# os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
+
+GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+
 
 # Encode image to base64
 def encode_image(image_path):
@@ -22,8 +24,6 @@ def encode_image(image_path):
         return base64.b64encode(img.read()).decode("utf-8")
 
 # Extract Aadhaar details using OCR API
-
-
 def extract_aadhaar_details(image_path):
     try:
         client = Groq()
@@ -50,14 +50,11 @@ def extract_aadhaar_details(image_path):
         )
 
         response = chat_completion.choices[0].message.content.strip()
-
-        # Try to extract valid JSON from the response
         json_text = re.search(r"\{.*\}", response, re.DOTALL)
         
         if json_text:
             try:
-                data = json.loads(json_text.group(0))  # Parse the JSON response
-                return data  # Returning structured dictionary instead of DataFrame
+                return json.loads(json_text.group(0))
             except json.JSONDecodeError as e:
                 st.error(f"Failed to parse JSON: {str(e)}")
                 return None
@@ -69,46 +66,35 @@ def extract_aadhaar_details(image_path):
         st.error(f"An error occurred: {str(e)}")
         return None
 
-
-
-
 # Extract face from Aadhaar image
 def extract_face(image, margin_top=100, margin_other=50):
-    # Convert PIL image to OpenCV format
-    rgb_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    rgb_image = np.array(image.convert("RGB"))  # Ensure RGB format
     
-    # Detect faces
     face_locations = face_recognition.face_locations(rgb_image)
-    
-    if len(face_locations) == 0:
+    if not face_locations:
         return None
     
-    # Extract first detected face
     top, right, bottom, left = face_locations[0]
-    
-    # Add margins
     height, width, _ = rgb_image.shape
-    top = max(0, top - margin_top)  # Extend top more
+    top = max(0, top - margin_top)
     left = max(0, left - margin_other)
     bottom = min(height, bottom + margin_other)
     right = min(width, right + margin_other)
     
-    # Crop and return the face using PIL
     return image.crop((left, top, right, bottom))
-
 
 # Face verification
 def verify_identity(aadhaar_img, webcam_img):
-    a_enc = face_recognition.face_encodings(np.array(aadhaar_img))
-    w_enc = face_recognition.face_encodings(np.array(webcam_img))
+    a_enc = face_recognition.face_encodings(np.array(aadhaar_img.convert("RGB")))
+    w_enc = face_recognition.face_encodings(np.array(webcam_img.convert("RGB")))
+    
     if not a_enc or not w_enc:
         return "❌ Not Recognizable"
+    
     return "✅ Verified" if face_recognition.compare_faces([a_enc[0]], w_enc[0], tolerance=0.45)[0] else "❌ Not Recognizable"
 
 # Streamlit UI
 st.title("📜 Aadhaar Verification System")
-
-# Create two columns
 col1, col2 = st.columns(2)
 
 # Aadhaar Upload (Left Column)
@@ -119,37 +105,28 @@ with col1:
     if aadhaar_file:
         aadhaar_img = Image.open(aadhaar_file)
         st.image(aadhaar_img, caption="📌 Aadhaar Card", use_container_width=True)
-
-    # Process Aadhaar Image
+        
         with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
             aadhaar_img.save(tmp.name)
-            details = extract_aadhaar_details(tmp.name)  # Now returns a dictionary
+            details = extract_aadhaar_details(tmp.name)
             aadhaar_face = extract_face(aadhaar_img)
         os.unlink(tmp.name)
 
-
         if details:
             st.subheader("Extracted Aadhaar Details")
-        
-        # Create two columns for structured display
-            col1_1, col1_2 = st.columns([2, 1])  # Adjust column widths as needed
-        
+            col1_1, col1_2 = st.columns([2, 1])
             
             with col1_1:
                 st.markdown(f"**👤 Name:** {details.get('name', 'N/A')}")
                 st.markdown(f"**📅 Date of Birth:** {details.get('dob', 'N/A')}")
                 st.markdown(f"**⚧ Gender:** {details.get('gender', 'N/A')}")
                 st.markdown(f"**🔢 Aadhaar Number:** {details.get('aadhaar_number', 'N/A')}")
-
-
-
-
+            
             with col1_2:
                 if aadhaar_face:
                     st.image(aadhaar_face, caption="🖼️ Face", width=150)
                 else:
                     st.warning("⚠️ No face detected.")
-
 
 # Webcam Capture & Verification (Right Column)
 with col2:
@@ -158,10 +135,6 @@ with col2:
 
     if webcam_file and aadhaar_file:
         user_img = Image.open(webcam_file)
-
-        # Show Captured Image
         st.image(user_img, caption="🧑 Captured Image", width=150)
-
-        # Verify and Show Result
         result = verify_identity(aadhaar_face, user_img)
         st.subheader(result)
