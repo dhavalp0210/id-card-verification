@@ -113,7 +113,7 @@ col1, col2 = st.columns(2)
 
 # Aadhaar Upload (Left Column)
 with col1:
-    st.header("📂 Upload Aadhaar Card")
+    st.subheader("📂 Upload Aadhaar Card")
     aadhaar_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
 
     if aadhaar_file:
@@ -134,11 +134,15 @@ with col1:
         # Create two columns for structured display
             col1_1, col1_2 = st.columns([2, 1])  # Adjust column widths as needed
         
+            
             with col1_1:
-                st.write(f"**👤 Name:** {details.get('name', 'N/A')}")
-                st.write(f"**📅 Date of Birth:** {details.get('dob', 'N/A')}")
-                st.write(f"**⚧ Gender:** {details.get('gender', 'N/A')}")
-                st.write(f"**🔢 Aadhaar Number:** {details.get('aadhaar_number', 'N/A')}")
+                st.markdown(f"**👤 Name:** {details.get('name', 'N/A')}")
+                st.markdown(f"**📅 Date of Birth:** {details.get('dob', 'N/A')}")
+                st.markdown(f"**⚧ Gender:** {details.get('gender', 'N/A')}")
+                st.markdown(f"**🔢 Aadhaar Number:** {details.get('aadhaar_number', 'N/A')}")
+
+
+
 
             with col1_2:
                 if aadhaar_face:
@@ -149,7 +153,7 @@ with col1:
 
 # Webcam Capture & Verification (Right Column)
 with col2:
-    st.header("📸 Capture Image")
+    st.subheader("📸 Capture Image")
     webcam_file = st.camera_input("Take a Photo")
 
     if webcam_file and aadhaar_file:
