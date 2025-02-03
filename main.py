@@ -68,18 +68,21 @@ def extract_aadhaar_details(image_path):
 
 # Extract face from Aadhaar image
 def extract_face(image, margin_top=100, margin_other=50):
-    # Convert PIL image to NumPy array (RGB)
+    # Convert image to RGB and ensure it's a valid NumPy array
     rgb_image = np.array(image.convert("RGB"), dtype=np.uint8)  
-    
-    # Ensure the image has 3 color channels (RGB)
+
+    # Validate Image Format
     if len(rgb_image.shape) != 3 or rgb_image.shape[2] != 3:
         raise ValueError("Invalid image format: Image must be an 8-bit RGB image.")
+
+    # Debug: Show Image
+    st.image(image, caption="Debug: Aadhaar Image", use_column_width=True)
 
     # Detect faces
     face_locations = face_recognition.face_locations(rgb_image)
 
     if not face_locations:
-        st.warning("⚠️ No face detected in the image.")
+        st.warning("⚠️ No face detected. Try another image.")
         return None
 
     # Extract first detected face
@@ -94,6 +97,7 @@ def extract_face(image, margin_top=100, margin_other=50):
 
     # Crop and return the face
     return image.crop((left, top, right, bottom))
+
 
 # Face verification
 def verify_identity(aadhaar_img, webcam_img):
